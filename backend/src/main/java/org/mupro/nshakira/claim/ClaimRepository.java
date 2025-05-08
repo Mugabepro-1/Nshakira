@@ -6,4 +6,6 @@ import java.util.List;
 
 public interface ClaimRepository extends JpaRepository<Claim, Long> {
     List<Claim> findByApprovedFalse();
+
+    List<Claim> findByApprovedTrue();
 }

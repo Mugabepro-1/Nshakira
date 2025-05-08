@@ -14,6 +14,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 @Service
 public class AuthService {
@@ -31,22 +32,20 @@ public class AuthService {
                 request.email(),
                 passwordEncoder.encode(request.password()),
                 role,
-                false,
-                generateOtp()
+                true,
+                ""
         );
         userRepository.save(user);
-        emailService.sendOtpEmail(user.getEmail(), user.getOtp());
-
-        return new AuthResponse("User registered successfully. Please verify the otp sent to your email");
+        
+        var jwt = jwtService.generateToken(user);
+        saveUserToken(user, jwt);
+        
+        return AuthResponse.fromUser(user, jwt);
     }
 
     public AuthResponse login(AuthRequest request){
         var user = userRepository.findByEmail(request.email())
                 .orElseThrow(() ->new UsernameNotFoundException("Invalid email"));
-
-        if(!user.isEnabled()){
-            throw new IllegalStateException("Account not verified");
-        }
 
         if(!passwordEncoder.matches(request.password(), user.getPassword())){
             throw new BadCredentialsException("Invalid password");
@@ -56,7 +55,8 @@ public class AuthService {
 
         revokeAllTokens(user);
         saveUserToken(user, jwt);
-        return new AuthResponse(jwt);
+        
+        return AuthResponse.fromUser(user, jwt);
     }
 
     public void logout(String jwt) {
@@ -77,7 +77,7 @@ public class AuthService {
     }
 
     private void revokeAllTokens(User user){
-        List<Token> validUserTokens = tokenRepository.findAllValidTokenByUser(user.getId());
+        List<Token> validUserTokens = tokenRepository.findAllValidTokenByUser(user);
         if(validUserTokens.isEmpty()){
             return;
         }
@@ -87,5 +87,31 @@ public class AuthService {
             token.setRevoked(true);
         }
         tokenRepository.saveAll(validUserTokens);
+    }
+
+    public AuthResponse verifyOtp(OtpVerificationRequest request) {
+        var user = userRepository.findByEmail(request.email())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        
+        if (!request.otp().equals(user.getOtp())) {
+            throw new BadCredentialsException("Invalid OTP");
+        }
+        
+        // Check if OTP is expired (optional, 10 minutes expiry)
+        LocalDateTime expiryTime = user.getOtpGeneratedAt().plusMinutes(10);
+        if (LocalDateTime.now().isAfter(expiryTime)) {
+            throw new BadCredentialsException("OTP has expired");
+        }
+        
+        // Enable the user and generate JWT
+        user.setEnabled(true);
+        userRepository.save(user);
+        
+        var jwt = jwtService.generateToken(user);
+        
+        revokeAllTokens(user);
+        saveUserToken(user, jwt);
+        
+        return AuthResponse.fromUser(user, jwt);
     }
 }

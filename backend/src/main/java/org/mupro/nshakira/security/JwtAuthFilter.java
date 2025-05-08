@@ -43,7 +43,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             var token = tokenRepository.findByToken(jwt);
 
             if (token.isPresent() && !token.get().isRevoked() && !token.get().isExpired()) {
-                if (jwtService.isTokenValid(jwt, new User())) {
+                if (jwtService.isTokenValid(jwt, userDetails)) {
                     var authToken = new UsernamePasswordAuthenticationToken(
                             userDetails, null, userDetails.getAuthorities()
                     );

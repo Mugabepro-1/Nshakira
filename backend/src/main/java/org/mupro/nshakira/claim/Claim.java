@@ -10,25 +10,22 @@ public class Claim {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long itemId;
-
-    private String itemType; // "LOST" or "FOUND"
+    private String itemName; // "LOST" or "FOUND"
 
     @ManyToOne
     @JoinColumn(name = "claimer_id")
     private User claimer;
 
-    private String reason;
+    private String description;
 
     private boolean approved = false;
 
     public Claim() {}
 
     public Claim(Long itemId, String itemType, User claimer, String reason, boolean approved) {
-        this.itemId = itemId;
-        this.itemType = itemType;
+        this.itemName = itemType;
         this.claimer = claimer;
-        this.reason = reason;
+        this.description = reason;
         this.approved = approved;
     }
 
@@ -42,20 +39,12 @@ public class Claim {
         this.id = id;
     }
 
-    public Long getItemId() {
-        return itemId;
+    public String getItemName() {
+        return itemName;
     }
 
-    public void setItemId(Long itemId) {
-        this.itemId = itemId;
-    }
-
-    public String getItemType() {
-        return itemType;
-    }
-
-    public void setItemType(String itemType) {
-        this.itemType = itemType;
+    public void setItemName(String itemType) {
+        this.itemName = itemType;
     }
 
     public User getClaimer() {
@@ -66,12 +55,12 @@ public class Claim {
         this.claimer = claimer;
     }
 
-    public String getReason() {
-        return reason;
+    public String getDescription() {
+        return description;
     }
 
-    public void setReason(String reason) {
-        this.reason = reason;
+    public void setDescription(String reason) {
+        this.description = reason;
     }
 
     public boolean isApproved() {

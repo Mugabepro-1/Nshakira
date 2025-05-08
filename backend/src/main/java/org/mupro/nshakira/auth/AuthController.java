@@ -5,7 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/uth")
+@RequestMapping("/api/auth")
 public class AuthController {
     @Autowired private AuthService authService;
 

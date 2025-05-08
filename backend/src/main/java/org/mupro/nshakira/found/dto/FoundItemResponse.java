@@ -2,7 +2,6 @@ package org.mupro.nshakira.found.dto;
 
 import org.mupro.nshakira.user.User;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class FoundItemResponse {
@@ -45,7 +44,7 @@ public class FoundItemResponse {
         return location;
     }
 
-    public LocalDate getFoundDate() {
+    public LocalDateTime getFoundDate() {
         return foundDate;
     }
 

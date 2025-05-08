@@ -3,6 +3,7 @@ package org.mupro.nshakira.found;
 import org.mupro.nshakira.found.dto.FoundItemRequest;
 import org.mupro.nshakira.found.dto.FoundItemResponse;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,6 +19,7 @@ public class FoundItemController {
         this.foundItemService = foundItemService;
     }
 
+    @PreAuthorize("hasRole('USER')")
     @PostMapping(consumes = {"multipart/form-data"})
     public ResponseEntity<FoundItemResponse> reportFoundItem(
             @ModelAttribute FoundItemRequest request,
@@ -31,10 +33,12 @@ public class FoundItemController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<List<FoundItemResponse>> getAllFoundItems() {
         return ResponseEntity.ok(foundItemService.getAllFoundItems());
     }
 
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<FoundItemResponse> getFoundItemById(@PathVariable Long id) {
         return ResponseEntity.ok(foundItemService.getFoundItemById(id));

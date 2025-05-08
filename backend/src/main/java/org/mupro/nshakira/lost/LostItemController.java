@@ -3,6 +3,7 @@ package org.mupro.nshakira.lost;
 import org.mupro.nshakira.lost.dto.LostItemRequest;
 import org.mupro.nshakira.lost.dto.LostItemResponse;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,6 +19,7 @@ public class LostItemController {
         this.lostItemService = lostItemService;
     }
 
+    @PreAuthorize("hasRole('USER')")
     @PostMapping(consumes = {"multipart/form-data"})
     public ResponseEntity<LostItemResponse> reportLostItem(
             @ModelAttribute LostItemRequest request,
@@ -30,11 +32,13 @@ public class LostItemController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @GetMapping
     public ResponseEntity<List<LostItemResponse>> getAllLostItems() {
         return ResponseEntity.ok(lostItemService.getAllLostItems());
     }
 
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<LostItemResponse> getLostItemById(@PathVariable Long id) {
         return ResponseEntity.ok(lostItemService.getLostItemById(id));
